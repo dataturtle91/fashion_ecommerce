@@ -1,12 +1,12 @@
 # Miesieczna liczba zamowien i zgloszen zwrotow, 2025-10 -- 2026-09.
 # Wymagane pakiety:
-# install.packages(c("DBI", "duckdb", "ggplot2", "plotly", "htmlwidgets"))
+# install.packages(c("DBI", "duckdb", "ggplot2"))
 # Uruchomienie z katalogu projektu: Rscript R/orders_returns_monthly.R
 # W RStudio: source("R/orders_returns_monthly.R") z katalogu projektu.
 # Opcjonalnie przekaz katalog projektu jako pierwszy argument Rscript.
 
 main <- function() {
-  required <- c("DBI", "duckdb", "ggplot2", "plotly", "htmlwidgets")
+  required <- c("DBI", "duckdb", "ggplot2")
   missing <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
   if (length(missing)) {
     stop("Zainstaluj wymagane pakiety: install.packages(c(",
@@ -72,77 +72,108 @@ main <- function() {
 
   reports_dir <- file.path(project_dir, "R", "reports")
   dir.create(reports_dir, recursive = TRUE, showWarnings = FALSE)
-  write.csv(result, file.path(reports_dir, "orders_returns_monthly.csv"),
-            row.names = FALSE, fileEncoding = "UTF-8")
-
-  # Oddzielne panele pozwalaja odczytac mniejsza liczbe zwrotow.
-  grDevices::svg(file.path(reports_dir, "orders_returns_monthly.svg"),
-                 width = 12, height = 8)
-  tryCatch({
-    par(mfrow = c(2, 1), mar = c(5, 5, 3, 1))
-    barplot(result$liczba_zamowien, names.arg = result$miesiac,
-            col = "#2563EB", border = NA, las = 2,
-            main = "Zamowienia wedlug miesiaca utworzenia (wszystkie statusy)",
-            ylab = "Liczba zamowien")
-    barplot(result$liczba_zwrotow, names.arg = result$miesiac,
-            col = "#EA580C", border = NA, las = 2,
-            main = "Zgloszenia zwrotow wedlug miesiaca rejestracji",
-            ylab = "Liczba zgloszen zwrotow")
-  }, finally = grDevices::dev.off())
-
   # Wspolna os czasu i wspolna skala liczebnosci dla obu serii.
   line_data <- data.frame(
     miesiac = rep(as.Date(paste0(result$miesiac, "-01")), 2),
     liczba = c(result$liczba_zamowien, result$liczba_zwrotow),
     seria = rep(c("Zamówienia", "Zgłoszenia zwrotów"), each = nrow(result))
   )
+  month_dates <- as.Date(paste0(result$miesiac, "-01"))
+  month_labels <- c("paź\n2025", "lis", "gru", "sty\n2026", "lut", "mar",
+                    "kwi", "maj", "cze", "lip", "sie", "wrz")
+  palette <- c("Zamówienia" = "#176B70", "Zgłoszenia zwrotów" = "#C46C46")
+  format_count <- function(x) format(x, big.mark = " ", scientific = FALSE, trim = TRUE)
+
   line_plot <- ggplot2::ggplot(
     line_data,
     ggplot2::aes(x = miesiac, y = liczba, colour = seria, group = seria)
   ) +
-    ggplot2::geom_line(linewidth = 0.9) +
-    ggplot2::geom_point(size = 2) +
-    ggplot2::scale_colour_manual(
-      values = c("Zamówienia" = "#2563EB", "Zgłoszenia zwrotów" = "#EA580C")
+    ggplot2::geom_line(linewidth = 1.2, lineend = "round") +
+    ggplot2::geom_point(shape = 21, fill = "#FAF9F6", size = 3, stroke = 1.2) +
+    ggplot2::scale_colour_manual(values = palette, breaks = names(palette)) +
+    ggplot2::scale_x_date(
+      breaks = month_dates, labels = month_labels,
+      expand = ggplot2::expansion(mult = c(0.025, 0.025))
     ) +
-    ggplot2::scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m") +
-    ggplot2::scale_y_continuous(limits = c(0, NA)) +
+    ggplot2::scale_y_continuous(
+      limits = c(0, NA), labels = format_count,
+      expand = ggplot2::expansion(mult = c(0.02, 0.12))
+    ) +
     ggplot2::labs(
-      title = "Miesięczna liczba zamówień i zwrotów",
-      subtitle = "Zamówienia: wszystkie statusy. Zwroty: liczba zgłoszeń.",
-      x = "Miesiąc", y = "Liczba", colour = NULL,
-      caption = "Według dat utworzenia zamówień i rejestracji zwrotów."
+      title = "Rok w zamówieniach i zwrotach",
+      subtitle = paste0(
+        "PAŹ 2025 — WRZ 2026   •   ",
+        format_count(sum(result$liczba_zamowien)), " zamówień   /   ",
+        format_count(sum(result$liczba_zwrotow)), " zgłoszeń zwrotów"
+      ),
+      x = NULL, y = "Liczba w miesiącu", colour = NULL,
+      caption = paste0(
+        "Zamówienia obejmują wszystkie statusy, w tym anulacje. Zwroty oznaczają zgłoszenia, nie sztuki.\n",
+        "Każda seria według własnej daty rejestracji; zwrot może dotyczyć wcześniejszego zamówienia.\n",
+        "Źródło: FashionCommerce • dane syntetyczne"
+      )
     ) +
-    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::theme_minimal(base_size = 12, base_family = "sans") +
     ggplot2::theme(
-      legend.position = "bottom",
-      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+      plot.background = ggplot2::element_rect(fill = "#FAF9F6", colour = NA),
+      panel.background = ggplot2::element_rect(fill = "#FAF9F6", colour = NA),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.major.y = ggplot2::element_line(colour = "#E3E5E1", linewidth = 0.35),
+      plot.title = ggplot2::element_text(size = 25, face = "bold", colour = "#203438",
+                                       margin = ggplot2::margin(b = 12)),
+      plot.subtitle = ggplot2::element_text(size = 11, colour = "#617173",
+                                          margin = ggplot2::margin(b = 18)),
+      plot.title.position = "plot",
+      plot.caption.position = "plot",
+      plot.caption = ggplot2::element_text(hjust = 0, size = 9, lineheight = 1.4,
+                                         colour = "#6E7979", margin = ggplot2::margin(t = 20)),
+      axis.text = ggplot2::element_text(colour = "#526366", size = 11),
+      axis.text.x = ggplot2::element_text(margin = ggplot2::margin(t = 10)),
+      axis.title.y = ggplot2::element_text(colour = "#617173", size = 10,
+                                         margin = ggplot2::margin(r = 12)),
+      legend.position = "top",
+      legend.justification = "left",
+      legend.text = ggplot2::element_text(colour = "#203438", size = 11),
+      legend.key.width = grid::unit(1.2, "cm"),
+      plot.margin = ggplot2::margin(25, 30, 20, 25)
     )
+
   ggplot2::ggsave(
     file.path(reports_dir, "orders_returns_monthly_line.png"),
-    plot = line_plot, width = 12, height = 6, dpi = 160, bg = "white"
+    plot = line_plot, width = 12, height = 7, dpi = 300, bg = "#FAF9F6"
   )
 
-  interactive_plot <- plotly::ggplotly(line_plot, tooltip = c("x", "y", "colour"))
-  interactive_plot <- plotly::config(interactive_plot, displaylogo = FALSE)
-  # HTML i katalog zaleznosci tworza komplet; zapis nie wymaga Pandoc.
-  htmlwidgets::saveWidget(
-    interactive_plot,
-    file = file.path(reports_dir, "orders_returns_monthly_line.html"),
-    selfcontained = FALSE
+  summary_lines <- c(
+    "ZAMÓWIENIA I ZWROTY — PODSUMOWANIE MIESIĘCZNE",
+    "Okres: październik 2025 – wrzesień 2026",
+    "",
+    sprintf(
+      "%s | Zamówienia: %s | Zgłoszenia zwrotów: %s",
+      result$miesiac,
+      format_count(result$liczba_zamowien),
+      format_count(result$liczba_zwrotow)
+    ),
+    "",
+    sprintf(
+      "Łącznie | Zamówienia: %s | Zgłoszenia zwrotów: %s",
+      format_count(sum(result$liczba_zamowien)),
+      format_count(sum(result$liczba_zwrotow))
+    ),
+    "",
+    "Zamówienia obejmują wszystkie statusy, w tym anulacje.",
+    "Zwroty to liczba zgłoszeń, nie liczba zwróconych sztuk ani refundacji.",
+    "Każda seria jest przypisana do miesiąca własnej rejestracji.",
+    "Zwroty mogą dotyczyć zamówień z wcześniejszych miesięcy."
   )
-  if (interactive()) {
-    print(line_plot)
-    print(interactive_plot)
-  }
-
-  print(result, row.names = FALSE)
-  cat("\nLaczna liczba zamowien:", sum(result$liczba_zamowien),
-      "\nLaczna liczba zgloszen zwrotow:", sum(result$liczba_zwrotow), "\n")
-  cat("Zwroty moga dotyczyc zamowien z poprzednich miesiecy.\n",
-      "Iloraz tych liczb nie jest kohortowa stopa zwrotow.\n",
-      "Raporty zapisano w:", reports_dir, "\n")
-  invisible(result)
+  writeLines(
+    enc2utf8(summary_lines),
+    file.path(reports_dir, "orders_returns_monthly_summary.txt"),
+    useBytes = TRUE
+  )
+  cat(paste(summary_lines, collapse = "\n"), "\n")
+  if (interactive()) print(line_plot)
+  invisible(line_plot)
 }
 
-monthly_analysis <- main()
+monthly_plot <- main()
