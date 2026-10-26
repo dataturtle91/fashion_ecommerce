@@ -1,0 +1,26 @@
+-- Uruchom z katalogu plikow CSV: duckdb fashion_ecommerce.duckdb < import_duckdb.sql
+BEGIN TRANSACTION;
+CREATE OR REPLACE TABLE ga4_event_items AS SELECT * FROM read_csv_auto('ga4_event_items.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ga4_events AS SELECT * FROM read_csv_auto('ga4_events.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ga4_sessions AS SELECT * FROM read_csv_auto('ga4_sessions.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE inventory_movements AS SELECT * FROM read_csv_auto('inventory_movements.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE inventory_stock_snapshot AS SELECT * FROM read_csv_auto('inventory_stock_snapshot.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE marketing_campaign AS SELECT * FROM read_csv_auto('marketing_campaign.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE marketing_daily_spend AS SELECT * FROM read_csv_auto('marketing_daily_spend.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_address AS SELECT * FROM read_csv_auto('ps_address.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_cart AS SELECT * FROM read_csv_auto('ps_cart.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_cart_product AS SELECT * FROM read_csv_auto('ps_cart_product.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_category AS SELECT * FROM read_csv_auto('ps_category.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_customer AS SELECT * FROM read_csv_auto('ps_customer.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_order_detail AS SELECT * FROM read_csv_auto('ps_order_detail.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_order_history AS SELECT * FROM read_csv_auto('ps_order_history.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_order_payment AS SELECT * FROM read_csv_auto('ps_order_payment.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_order_return AS SELECT * FROM read_csv_auto('ps_order_return.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_order_return_detail AS SELECT * FROM read_csv_auto('ps_order_return_detail.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_order_state AS SELECT * FROM read_csv_auto('ps_order_state.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_orders AS SELECT * FROM read_csv_auto('ps_orders.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_product AS SELECT * FROM read_csv_auto('ps_product.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_product_attribute AS SELECT * FROM read_csv_auto('ps_product_attribute.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+CREATE OR REPLACE TABLE ps_stock_available AS SELECT * FROM read_csv_auto('ps_stock_available.csv', HEADER=true, SAMPLE_SIZE=-1, NULLSTR='');
+COMMIT;
+-- Np.: SELECT COUNT(*) FROM ps_orders;
