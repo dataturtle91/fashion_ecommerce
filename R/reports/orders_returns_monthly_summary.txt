@@ -1,0 +1,22 @@
+ZAMÓWIENIA I ZWROTY — PODSUMOWANIE MIESIĘCZNE
+Okres: październik 2025 – wrzesień 2026
+
+2025-10 | Zamówienia: 896 | Zgłoszenia zwrotów: 58
+2025-11 | Zamówienia: 907 | Zgłoszenia zwrotów: 60
+2025-12 | Zamówienia: 947 | Zgłoszenia zwrotów: 64
+2026-01 | Zamówienia: 957 | Zgłoszenia zwrotów: 98
+2026-02 | Zamówienia: 886 | Zgłoszenia zwrotów: 58
+2026-03 | Zamówienia: 923 | Zgłoszenia zwrotów: 72
+2026-04 | Zamówienia: 889 | Zgłoszenia zwrotów: 75
+2026-05 | Zamówienia: 976 | Zgłoszenia zwrotów: 70
+2026-06 | Zamówienia: 912 | Zgłoszenia zwrotów: 71
+2026-07 | Zamówienia: 999 | Zgłoszenia zwrotów: 74
+2026-08 | Zamówienia: 972 | Zgłoszenia zwrotów: 64
+2026-09 | Zamówienia: 935 | Zgłoszenia zwrotów: 81
+
+Łącznie | Zamówienia: 11 199 | Zgłoszenia zwrotów: 845
+
+Zamówienia obejmują wszystkie statusy, w tym anulacje.
+Zwroty to liczba zgłoszeń, nie liczba zwróconych sztuk ani refundacji.
+Każda seria jest przypisana do miesiąca własnej rejestracji.
+Zwroty mogą dotyczyć zamówień z wcześniejszych miesięcy.
