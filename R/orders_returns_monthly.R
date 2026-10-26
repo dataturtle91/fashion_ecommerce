@@ -1,11 +1,12 @@
 # Miesieczna liczba zamowien i zgloszen zwrotow, 2025-10 -- 2026-09.
-# Wymagane pakiety: install.packages(c("DBI", "duckdb"))
+# Wymagane pakiety:
+# install.packages(c("DBI", "duckdb", "ggplot2", "plotly", "htmlwidgets"))
 # Uruchomienie z katalogu projektu: Rscript R/orders_returns_monthly.R
 # W RStudio: source("R/orders_returns_monthly.R") z katalogu projektu.
 # Opcjonalnie przekaz katalog projektu jako pierwszy argument Rscript.
 
 main <- function() {
-  required <- c("DBI", "duckdb")
+  required <- c("DBI", "duckdb", "ggplot2", "plotly", "htmlwidgets")
   missing <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
   if (length(missing)) {
     stop("Zainstaluj wymagane pakiety: install.packages(c(",
@@ -88,6 +89,52 @@ main <- function() {
             main = "Zgloszenia zwrotow wedlug miesiaca rejestracji",
             ylab = "Liczba zgloszen zwrotow")
   }, finally = grDevices::dev.off())
+
+  # Wspolna os czasu i wspolna skala liczebnosci dla obu serii.
+  line_data <- data.frame(
+    miesiac = rep(as.Date(paste0(result$miesiac, "-01")), 2),
+    liczba = c(result$liczba_zamowien, result$liczba_zwrotow),
+    seria = rep(c("Zamówienia", "Zgłoszenia zwrotów"), each = nrow(result))
+  )
+  line_plot <- ggplot2::ggplot(
+    line_data,
+    ggplot2::aes(x = miesiac, y = liczba, colour = seria, group = seria)
+  ) +
+    ggplot2::geom_line(linewidth = 0.9) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::scale_colour_manual(
+      values = c("Zamówienia" = "#2563EB", "Zgłoszenia zwrotów" = "#EA580C")
+    ) +
+    ggplot2::scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m") +
+    ggplot2::scale_y_continuous(limits = c(0, NA)) +
+    ggplot2::labs(
+      title = "Miesięczna liczba zamówień i zwrotów",
+      subtitle = "Zamówienia: wszystkie statusy. Zwroty: liczba zgłoszeń.",
+      x = "Miesiąc", y = "Liczba", colour = NULL,
+      caption = "Według dat utworzenia zamówień i rejestracji zwrotów."
+    ) +
+    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::theme(
+      legend.position = "bottom",
+      axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+    )
+  ggplot2::ggsave(
+    file.path(reports_dir, "orders_returns_monthly_line.png"),
+    plot = line_plot, width = 12, height = 6, dpi = 160, bg = "white"
+  )
+
+  interactive_plot <- plotly::ggplotly(line_plot, tooltip = c("x", "y", "colour"))
+  interactive_plot <- plotly::config(interactive_plot, displaylogo = FALSE)
+  # HTML i katalog zaleznosci tworza komplet; zapis nie wymaga Pandoc.
+  htmlwidgets::saveWidget(
+    interactive_plot,
+    file = file.path(reports_dir, "orders_returns_monthly_line.html"),
+    selfcontained = FALSE
+  )
+  if (interactive()) {
+    print(line_plot)
+    print(interactive_plot)
+  }
 
   print(result, row.names = FALSE)
   cat("\nLaczna liczba zamowien:", sum(result$liczba_zamowien),
